@@ -125,11 +125,20 @@ start.setMilliseconds(0);
 
   if (!duration) return;
 
-  const minutes = parseInt(duration, 10);
-  if (![30, 60, 90, 120].includes(minutes)) {
-    alert("Dozwolone czasy: 30, 60, 90, 120 minut");
-    return;
-  }
+ const minutes = parseInt(duration, 10);
+
+const allowedDurations = [
+  30, 60, 90, 120, 150,
+  180, 210, 240, 270, 300
+];
+
+if (!allowedDurations.includes(minutes)) {
+  alert(
+    "Dozwolone czasy:\n" +
+    "30, 60, 90, 120, 150, 180, 210, 240, 270 lub 300 minut"
+  );
+  return;
+}
 
   const end = new Date(start.getTime() + minutes * 60 * 1000);
 
