@@ -264,6 +264,11 @@ window.addEventListener("DOMContentLoaded", () => {
     currentDate.setDate(currentDate.getDate() - 1);
     changeDate(currentDate);
   };
+document.getElementById("today").onclick = () => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  changeDate(today);
+};
 
   document.getElementById("next").onclick = () => {
     currentDate.setDate(currentDate.getDate() + 1);
@@ -391,11 +396,13 @@ input[type="date"], button {
 
 <header>
   <button id="prev">◀</button>
+
+  <button id="today">Dziś</button>   <!-- ⬅️ TO DODAJEMY -->
+
   <div id="currentDate"></div>
   <input type="date" id="datePicker">
   <button id="next">▶</button>
 </header>
-
 <div class="tables">
   <div class="table"><h2>Stół 1</h2><div id="c1"></div></div>
   <div class="table"><h2>Stół 2</h2><div id="c2"></div></div>
