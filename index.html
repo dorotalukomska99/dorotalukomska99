@@ -86,6 +86,8 @@ timeZone: 'local',
     nowIndicator: true,
     slotMinTime: "16:00:00",
     slotMaxTime: "26:00:00",
+slotDuration: "00:15:00",
+snapDuration: "00:15:00",
     height: "auto",
     initialDate: currentDate,
     headerToolbar: false,
@@ -108,7 +110,10 @@ timeZone: 'local',
       });
     },
 dateClick: async (info) => {
-  const start = info.date;
+  const start = new Date(info.date);
+start.setMinutes(Math.round(start.getMinutes() / 15) * 15);
+start.setSeconds(0);
+start.setMilliseconds(0);
 
   const duration = prompt(
     "Na ile czasu?\nWpisz liczbę minut:\n30 / 60 / 90 / 120",
