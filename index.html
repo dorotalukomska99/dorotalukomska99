@@ -252,6 +252,7 @@ function changeDate(date) {
 updateSummary();
 }
 function updateSummary() {
+
   const summary = {
     "Stół 1": 0,
     "Stół 2": 0,
@@ -259,27 +260,48 @@ function updateSummary() {
     "Stół 4": 0
   };
 
+  // zakres dnia: 16:00 -> 02:00
+  const startOfDay = new Date(currentDate);
+  startOfDay.setHours(16, 0, 0, 0);
+
+  const endOfDay = new Date(currentDate);
+  endOfDay.setDate(endOfDay.getDate() + 1);
+  endOfDay.setHours(2, 0, 0, 0);
+
   calendars.forEach(cal => {
     cal.getEvents().forEach(event => {
+
+      const eventStart = event.start;
+      const eventEnd = event.end;
+
+      // jeżeli NIE nachodzi na zakres 16:00–02:00 → pomijamy
+      if (eventEnd <= startOfDay || eventStart >= endOfDay) return;
+
+      // bierzemy tylko część w zakresie
+      const realStart = eventStart < startOfDay ? startOfDay : eventStart;
+      const realEnd = eventEnd > endOfDay ? endOfDay : eventEnd;
+
+      const minutes = (realEnd - realStart) / (1000 * 60);
       const stol = event.extendedProps.stol;
-      const minutes = (event.end - event.start) / (1000 * 60);
+
       summary[stol] += minutes;
     });
   });
 
+  // --- budowanie HTML ---
   let html = "";
+  let totalMinutes = 0;
 
-Object.entries(summary).forEach(([stol, minutes]) => {
-  const hours = (minutes / 60).toFixed(2);
-  html += `${stol}: ${hours} h<br>`;
-});
+  Object.entries(summary).forEach(([stol, minutes]) => {
+    totalMinutes += minutes;
+    const hours = (minutes / 60).toFixed(2);
+    html += <div><strong>${stol}:</strong> ${hours} h</div>;
+  });
 
-const totalMinutes = Object.values(summary).reduce((a, b) => a + b, 0);
-const totalHours = (totalMinutes / 60).toFixed(2);
+  const totalHours = (totalMinutes / 60).toFixed(2);
+  html += <hr><div><strong>Łącznie:</strong> ${totalHours} h</div>;
 
-html += `<hr>Łącznie: ${totalHours} h`;
-
-document.getElementById("summary").innerHTML = html;
+  document.getElementById("summary").innerHTML = html;
 }
 
 window.addEventListener("DOMContentLoaded", () => {
