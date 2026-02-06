@@ -96,6 +96,38 @@ snapDuration: "00:15:00",
     headerToolbar: false,
 
     select: async (info) => {
+
+  const minutes = Math.round((info.end - info.start) / (1000 * 60));
+
+  const allowedDurations = [
+    30, 60, 90, 120, 150,
+    180, 210, 240, 270, 300
+  ];
+
+  if (!allowedDurations.includes(minutes)) {
+    alert(
+      "Dozwolone czasy:\n" +
+      "30, 60, 90, 120, 150, 180, 210, 240, 270 lub 300 minut"
+    );
+    return;
+  }
+
+  const name = prompt("Kto rezerwuje?");
+  if (!name) return;
+
+  const events = cal.getEvents();
+  if (isOverlapping(events, info.start, info.end)) {
+    alert("Ten stół jest już zajęty");
+    return;
+  }
+
+  await addDoc(collection(db, "rezerwacje"), {
+    nazwa: name,
+    start: Timestamp.fromDate(info.start),
+    end: Timestamp.fromDate(info.end),
+    stol
+  });
+},
       const name = prompt("Kto rezerwuje?");
       if (!name) return;
 
