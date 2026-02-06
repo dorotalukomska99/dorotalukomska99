@@ -271,13 +271,13 @@ function updateSummary() {
 
 Object.entries(summary).forEach(([stol, minutes]) => {
   const hours = (minutes / 60).toFixed(2);
-  html += ${stol}: ${hours} h<br>;
+  html += `${stol}: ${hours} h<br>`;
 });
 
 const totalMinutes = Object.values(summary).reduce((a, b) => a + b, 0);
 const totalHours = (totalMinutes / 60).toFixed(2);
 
-html += <hr>Łącznie: ${totalHours} h;
+html += `<hr>Łącznie: ${totalHours} h`;
 
 document.getElementById("summary").innerHTML = html;
 }
