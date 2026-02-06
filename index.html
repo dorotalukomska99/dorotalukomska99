@@ -107,6 +107,26 @@ timeZone: 'local',
         stol
       });
     },
+dateClick: async (info) => {
+  const start = info.date;
+  const end = new Date(start.getTime() + 60 * 60 * 1000); // 1 godzina
+
+  const name = prompt("Kto rezerwuje?");
+  if (!name) return;
+
+  const events = cal.getEvents();
+  if (isOverlapping(events, start, end)) {
+    alert("Ten stół jest już zajęty");
+    return;
+  }
+
+  await addDoc(collection(db, "rezerwacje"), {
+    nazwa: name,
+    start: Timestamp.fromDate(start),
+    end: Timestamp.fromDate(end),
+    stol
+  });
+},
 
     eventDidMount: (info) => {
       const now = new Date();
