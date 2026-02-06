@@ -76,6 +76,7 @@ function updateDateLabel(date) {
 /* 🧠 KALENDARZ */
 function createCalendar(id, stol, color) {
   const cal = new FullCalendar.Calendar(document.getElementById(id), {
+timeZone: 'local',
     initialView: "timeGridDay",
     locale: "pl",
     allDaySlot: false,
