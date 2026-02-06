@@ -112,22 +112,7 @@ snapDuration: "00:15:00",
     return;
   }
 
-  const name = prompt("Kto rezerwuje?");
-  if (!name) return;
-
-  const events = cal.getEvents();
-  if (isOverlapping(events, info.start, info.end)) {
-    alert("Ten stół jest już zajęty");
-    return;
-  }
-
-  await addDoc(collection(db, "rezerwacje"), {
-    nazwa: name,
-    start: Timestamp.fromDate(info.start),
-    end: Timestamp.fromDate(info.end),
-    stol
-  });
-},
+ 
       const name = prompt("Kto rezerwuje?");
       if (!name) return;
 
@@ -376,14 +361,7 @@ input[type="date"], button {
 }
 </style>
 </head>
-<button onclick="logout()" style="
-  position:fixed;
-  bottom:10px;
-  right:10px;
-  z-index:999;
-">Wyloguj</button>
 
-</div>
 <body>
 
 <div id="login" style="
@@ -402,6 +380,14 @@ input[type="date"], button {
 </div>
 
 <div id="app" style="display:none;">
+<button onclick="logout()" style="
+  position:fixed;
+  bottom:10px;
+  right:10px;
+  z-index:999;
+">
+  Wyloguj
+</button>
 
 <header>
   <button id="prev">◀</button>
