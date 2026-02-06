@@ -228,16 +228,20 @@ if (!allowedDurations.includes(minutes)) {
       if (e.stol !== stol) return;
 
       cal.addEvent({
-        id: d.id,
-        title: e.nazwa,
-        start: e.start.toDate(),
-        end: e.end.toDate(),
-        backgroundColor: color,
-        borderColor: color,
-        textColor: "#fff"
-      });
+  id: d.id,
+  title: e.nazwa,
+  start: e.start.toDate(),
+  end: e.end.toDate(),
+  backgroundColor: color,
+  borderColor: color,
+  textColor: "#fff",
+  extendedProps: {
+    stol: e.stol
+  }
+});
     });
   });
+updateSummary();
 }
 
 /* 📅 ZMIANA DATY */
@@ -245,6 +249,37 @@ function changeDate(date) {
   currentDate = date;
   calendars.forEach(c => c.gotoDate(date));
   updateDateLabel(date);
+updateSummary();
+}
+function updateSummary() {
+  const summary = {
+    "Stół 1": 0,
+    "Stół 2": 0,
+    "Stół 3": 0,
+    "Stół 4": 0
+  };
+
+  calendars.forEach(cal => {
+    cal.getEvents().forEach(event => {
+      const stol = event.extendedProps.stol;
+      const minutes = (event.end - event.start) / (1000 * 60);
+      summary[stol] += minutes;
+    });
+  });
+
+  let html = "";
+
+Object.entries(summary).forEach(([stol, minutes]) => {
+  const hours = (minutes / 60).toFixed(2);
+  html += ${stol}: ${hours} h<br>;
+});
+
+const totalMinutes = Object.values(summary).reduce((a, b) => a + b, 0);
+const totalHours = (totalMinutes / 60).toFixed(2);
+
+html += <hr>Łącznie: ${totalHours} h;
+
+document.getElementById("summary").innerHTML = html;
 }
 
 window.addEventListener("DOMContentLoaded", () => {
