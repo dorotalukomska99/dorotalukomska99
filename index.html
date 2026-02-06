@@ -246,10 +246,13 @@ updateSummary();
 
 /* 📅 ZMIANA DATY */
 function changeDate(date) {
-  currentDate = date;
-  calendars.forEach(c => c.gotoDate(date));
-  updateDateLabel(date);
-updateSummary();
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);   // ← TO JEST KLUCZOWE
+
+  currentDate = d;
+  calendars.forEach(c => c.gotoDate(d));
+  updateDateLabel(d);
+  updateSummary();
 }
 function updateSummary() {
 
@@ -260,7 +263,7 @@ function updateSummary() {
     "Stół 4": 0
   };
 
-  // zakres dnia: 16:00 -> 02:00
+  // zakres dnia: 16:00 → 02:00
   const startOfDay = new Date(currentDate);
   startOfDay.setHours(16, 0, 0, 0);
 
@@ -274,7 +277,7 @@ function updateSummary() {
       const eventStart = event.start;
       const eventEnd = event.end;
 
-      // jeżeli NIE nachodzi na zakres 16:00–02:00 → pomijamy
+      // jeśli NIE nachodzi na zakres → pomijamy
       if (eventEnd <= startOfDay || eventStart >= endOfDay) return;
 
       // bierzemy tylko część w zakresie
@@ -284,11 +287,13 @@ function updateSummary() {
       const minutes = (realEnd - realStart) / (1000 * 60);
       const stol = event.extendedProps.stol;
 
-      summary[stol] += minutes;
+      if (summary[stol] !== undefined) {
+        summary[stol] += minutes;
+      }
     });
   });
 
-  // --- budowanie HTML ---
+  // --- HTML ---
   let html = "";
   let totalMinutes = 0;
 
