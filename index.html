@@ -150,10 +150,10 @@ start.setMinutes(Math.round(start.getMinutes() / 15) * 15);
 start.setSeconds(0);
 start.setMilliseconds(0);
 
-  const duration = prompt(
-    "Na ile czasu?\nWpisz liczbę minut:\n30 / 60 / 90 / 120",
-    "60"
-  );
+ const duration = prompt(
+  "Na ile czasu?\nWpisz liczbę minut:\n30–300 co 30 minut",
+  "120"
+);
 
   if (!duration) return;
 
