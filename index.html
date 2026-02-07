@@ -228,23 +228,84 @@ if (!allowedDurations.includes(minutes)) {
       if (e.stol !== stol) return;
 
       cal.addEvent({
-        id: d.id,
-        title: e.nazwa,
-        start: e.start.toDate(),
-        end: e.end.toDate(),
-        backgroundColor: color,
-        borderColor: color,
-        textColor: "#fff"
-      });
+  id: d.id,
+  title: e.nazwa,
+  start: e.start.toDate(),
+  end: e.end.toDate(),
+  backgroundColor: color,
+  borderColor: color,
+  textColor: "#fff",
+  extendedProps: {
+    stol: e.stol
+  }
+});
     });
   });
 }
 
 /* 📅 ZMIANA DATY */
 function changeDate(date) {
-  currentDate = date;
-  calendars.forEach(c => c.gotoDate(date));
-  updateDateLabel(date);
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);   // ← TO JEST KLUCZOWE
+
+  currentDate = d;
+  calendars.forEach(c => c.gotoDate(d));
+  updateDateLabel(d);
+  updateSummary();
+}
+function updateSummary() {
+
+  const summary = {
+    "Stół 1": 0,
+    "Stół 2": 0,
+    "Stół 3": 0,
+    "Stół 4": 0
+  };
+
+  // zakres dnia: 16:00 → 02:00
+  const startOfDay = new Date(currentDate);
+  startOfDay.setHours(16, 0, 0, 0);
+
+  const endOfDay = new Date(currentDate);
+  endOfDay.setDate(endOfDay.getDate() + 1);
+  endOfDay.setHours(2, 0, 0, 0);
+
+  calendars.forEach(cal => {
+    cal.getEvents().forEach(event => {
+
+      const eventStart = event.start;
+      const eventEnd = event.end;
+
+      // jeśli NIE nachodzi na zakres → pomijamy
+      if (eventEnd <= startOfDay || eventStart >= endOfDay) return;
+
+      // bierzemy tylko część w zakresie
+      const realStart = eventStart < startOfDay ? startOfDay : eventStart;
+      const realEnd = eventEnd > endOfDay ? endOfDay : eventEnd;
+
+      const minutes = (realEnd - realStart) / (1000 * 60);
+      const stol = event.extendedProps.stol;
+
+      if (summary[stol] !== undefined) {
+        summary[stol] += minutes;
+      }
+    });
+  });
+
+  // --- HTML ---
+  let html = "";
+  let totalMinutes = 0;
+
+  Object.entries(summary).forEach(([stol, minutes]) => {
+    totalMinutes += minutes;
+    const hours = (minutes / 60).toFixed(2);
+    html += <div><strong>${stol}:</strong> ${hours} h</div>;
+  });
+
+  const totalHours = (totalMinutes / 60).toFixed(2);
+  html += <hr><div><strong>Łącznie:</strong> ${totalHours} h</div>;
+
+  document.getElementById("summary").innerHTML = html;
 }
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -264,6 +325,11 @@ window.addEventListener("DOMContentLoaded", () => {
     currentDate.setDate(currentDate.getDate() - 1);
     changeDate(currentDate);
   };
+document.getElementById("today").onclick = () => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  changeDate(today);
+};
 
   document.getElementById("next").onclick = () => {
     currentDate.setDate(currentDate.getDate() + 1);
@@ -391,16 +457,26 @@ input[type="date"], button {
 
 <header>
   <button id="prev">◀</button>
+
+  <button id="today">Dziś</button>   <!-- ⬅️ TO DODAJEMY -->
+
   <div id="currentDate"></div>
   <input type="date" id="datePicker">
   <button id="next">▶</button>
 </header>
-
 <div class="tables">
   <div class="table"><h2>Stół 1</h2><div id="c1"></div></div>
   <div class="table"><h2>Stół 2</h2><div id="c2"></div></div>
   <div class="table"><h2>Stół 3</h2><div id="c3"></div></div>
   <div class="table"><h2>Stół 4</h2><div id="c4"></div></div>
+</div>
+
+<div id="summary" style="
+  padding: 15px;
+  text-align: center;
+  background: #111;
+  font-size: 18px;
+">
 </div>
 
 </body>
