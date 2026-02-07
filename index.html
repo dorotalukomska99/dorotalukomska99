@@ -299,11 +299,11 @@ function updateSummary() {
   Object.entries(summary).forEach(([stol, minutes]) => {
     totalMinutes += minutes;
     const hours = (minutes / 60).toFixed(2);
-    html += <div><strong>${stol}:</strong> ${hours} h</div>;
+    html += `<div><strong>${stol}:</strong> ${hours} h</div>`;
   });
 
   const totalHours = (totalMinutes / 60).toFixed(2);
-  html += <hr><div><strong>Łącznie:</strong> ${totalHours} h</div>;
+  html += `<hr><div><strong>Łącznie:</strong> ${totalHours} h</div>`;
 
   document.getElementById("summary").innerHTML = html;
 }
