@@ -129,14 +129,13 @@ snapDuration: "00:15:00",
         return;
       }
 
-     await addDoc(collection(db, "rezerwacje"), {
-  nazwa: name,
-  start: Timestamp.fromDate(start),
-  end: Timestamp.fromDate(end),
-  stol,
-  createdBy: currentUserName
-});
-},
+      await addDoc(collection(db, "rezerwacje"), {
+        nazwa: name,
+        start: Timestamp.fromDate(info.start),
+        end: Timestamp.fromDate(info.end),
+        stol
+      });
+    },
 dateClick: async (info) => {
   const start = new Date(info.date);
 start.setMinutes(Math.round(start.getMinutes() / 15) * 15);
@@ -184,26 +183,12 @@ if (!allowedDurations.includes(minutes)) {
   });
 },
 
-   eventDidMount: (info) => {
-  const who = info.event.extendedProps.createdBy;
-  if (!who) return;
-
-  const label = document.createElement("div");
-  label.textContent = Dodane przez: ${who};
-  label.style.position = "absolute";
-  label.style.bottom = "2px";
-  label.style.right = "4px";
-  label.style.fontSize = "10px";
-  label.style.opacity = "0.8";
-
-  info.el.style.position = "relative";
-  info.el.appendChild(label);
-
-  const now = new Date();
-  if (info.event.start < now) {
-    info.el.style.opacity = "0.4";
-  }
-};
+    eventDidMount: (info) => {
+      const now = new Date();
+      if (info.event.start < now) {
+        info.el.style.opacity = "0.4";
+      }
+    },
 
     eventDrop: async (info) => {
       const events = cal.getEvents();
@@ -257,11 +242,9 @@ if (!allowedDurations.includes(minutes)) {
   backgroundColor: color,
   borderColor: color,
   textColor: "#fff",
- 
-extendedProps: {
-  stol: e.stol,
-  createdBy: e.createdBy
-} 
+  extendedProps: {
+    stol: e.stol
+  }
 });
     });
   });
@@ -305,16 +288,10 @@ document.getElementById("today").onclick = () => {
     changeDate(currentDate);
   };
 });
-
 onAuthStateChanged(auth, user => {
   if (user) {
-
-    const email = user.email;
-    currentUserName = usersMap[email] || email;
-
     document.getElementById("login").style.display = "none";
     document.getElementById("app").style.display = "block";
-
   } else {
     document.getElementById("login").style.display = "flex";
     document.getElementById("app").style.display = "none";
