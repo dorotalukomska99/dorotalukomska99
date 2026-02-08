@@ -131,11 +131,12 @@ snapDuration: "00:15:00",
 
       await addDoc(collection(db, "rezerwacje"), {
   nazwa: name,
-  start: Timestamp.fromDate(start),
-  end: Timestamp.fromDate(end),
+  start: Timestamp.fromDate(info.start),
+  end: Timestamp.fromDate(info.end),
   stol,
   createdBy: currentUserName
 });
+
     },
 dateClick: async (info) => {
   const start = new Date(info.date);
