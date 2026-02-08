@@ -54,6 +54,13 @@ const colors = {
 let calendars = [];
 let currentDate = new Date();
 
+const usersMap = {
+  "dorotalukomska99@gmail.com": "Dorota",
+  "merkurytilt@gmail.com": "Paweł"
+};
+
+let currentUserName = "";
+
 /* 🔁 SPRAWDZANIE NAKŁADANIA */
 function isOverlapping(events, start, end, ignoreId) {
   return events.some(e =>
