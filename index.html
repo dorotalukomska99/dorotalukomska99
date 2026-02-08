@@ -53,6 +53,12 @@ const colors = {
 
 let calendars = [];
 let currentDate = new Date();
+const usersMap = {
+  "dorotalukomska99@gmail.com": "Dorota",
+  "merkurytilt@gmail.com": "Paweł"
+};
+
+let currentUserName = "";
 
 const usersMap = {
   "dorotalukomska99@gmail.com": "Dorota",
@@ -130,6 +136,12 @@ snapDuration: "00:15:00",
       }
 
       await addDoc(collection(db, "rezerwacje"), {
+  nazwa: name,
+  start: Timestamp.fromDate(start),
+  end: Timestamp.fromDate(end),
+  stol,
+  createdBy: currentUserName
+});
         nazwa: name,
         start: Timestamp.fromDate(info.start),
         end: Timestamp.fromDate(info.end),
@@ -176,6 +188,12 @@ if (!allowedDurations.includes(minutes)) {
   }
 
   await addDoc(collection(db, "rezerwacje"), {
+  nazwa: name,
+  start: Timestamp.fromDate(start),
+  end: Timestamp.fromDate(end),
+  stol,
+  createdBy: currentUserName
+});
     nazwa: name,
     start: Timestamp.fromDate(start),
     end: Timestamp.fromDate(end),
@@ -184,6 +202,24 @@ if (!allowedDurations.includes(minutes)) {
 },
 
     eventDidMount: (info) => {
+  const now = new Date();
+  if (info.event.start < now) {
+    info.el.style.opacity = "0.4";
+  }
+
+  const who = info.event.extendedProps.createdBy;
+  if (who) {
+    const badge = document.createElement("div");
+    badge.textContent = who;
+    badge.style.position = "absolute";
+    badge.style.bottom = "2px";
+    badge.style.right = "4px";
+    badge.style.fontSize = "10px";
+    badge.style.opacity = "0.8";
+
+    info.el.appendChild(badge);
+  }
+}
       const now = new Date();
       if (info.event.start < now) {
         info.el.style.opacity = "0.4";
@@ -243,6 +279,18 @@ if (!allowedDurations.includes(minutes)) {
   borderColor: color,
   textColor: "#fff",
   extendedProps: {
+    stol: e.stol,
+    createdBy: e.createdBy || ""
+  }
+});
+  id: d.id,
+  title: e.nazwa,
+  start: e.start.toDate(),
+  end: e.end.toDate(),
+  backgroundColor: color,
+  borderColor: color,
+  textColor: "#fff",
+  extendedProps: {
     stol: e.stol
   }
 });
@@ -290,6 +338,18 @@ document.getElementById("today").onclick = () => {
 });
 onAuthStateChanged(auth, user => {
   if (user) {
+    const email = user.email;
+    currentUserName = usersMap[email] || email;
+
+    document.getElementById("login").style.display = "none";
+    document.getElementById("app").style.display = "block";
+  } else {
+    currentUserName = "";
+
+    document.getElementById("login").style.display = "flex";
+    document.getElementById("app").style.display = "none";
+  }
+});
     document.getElementById("login").style.display = "none";
     document.getElementById("app").style.display = "block";
   } else {
