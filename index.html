@@ -136,11 +136,6 @@ snapDuration: "00:15:00",
   stol,
   createdBy: currentUserName
 });
-        nazwa: name,
-        start: Timestamp.fromDate(info.start),
-        end: Timestamp.fromDate(info.end),
-        stol
-      });
     },
 dateClick: async (info) => {
   const start = new Date(info.date);
@@ -207,9 +202,7 @@ if (!allowedDurations.includes(minutes)) {
     badge.style.opacity = "0.8";
 
     info.el.appendChild(badge);
-  }
-}
-     
+}  
     },
 
     eventDrop: async (info) => {
