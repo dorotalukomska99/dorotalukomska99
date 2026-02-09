@@ -20,14 +20,14 @@ import {
   doc,
   onSnapshot,
   updateDoc,
-  Timestamp
+  Timestamp,
+getDocs
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import {
   getAuth,
   signInWithEmailAndPassword,
   onAuthStateChanged,
   signOut
-getDocs
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
 /* 🔥 FIREBASE */
@@ -61,28 +61,6 @@ const usersMap = {
 };
 
 let currentUserName = "";
-
-async function archiveOldReservations() {
-  const now = new Date();
-
-  const snap = await getDocs(collection(db, "rezerwacje"));
-
-  for (const d of snap.docs) {
-    const data = d.data();
-
-    // jeżeli rezerwacja już się skończyła
-    if (data.end.toDate() < now) {
-      // dodaj do archiwum
-      await addDoc(collection(db, "rezerwacje_archiwum"), {
-        ...data,
-        archivedAt: Timestamp.fromDate(new Date())
-      });
-
-      // usuń z aktywnych
-      await deleteDoc(doc(db, "rezerwacje", d.id));
-    }
-  }
-}
 
 
 /* 🔁 SPRAWDZANIE NAKŁADANIA */
@@ -339,8 +317,6 @@ window.addEventListener("DOMContentLoaded", () => {
   createCalendar("c4", "Stół 4", colors.c4);
 
   updateDateLabel(currentDate);
-
-archiveOldReservations();
 
 
   document.getElementById("datePicker").valueAsDate = currentDate;
