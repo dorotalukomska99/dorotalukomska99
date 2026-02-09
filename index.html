@@ -268,27 +268,58 @@ if (!allowedDurations.includes(minutes)) {
   cal.render();
   calendars.push(cal);
 
-  onSnapshot(collection(db, "rezerwacje"), snap => {
-    cal.removeAllEvents();
-    snap.forEach(d => {
-      const e = d.data();
-      if (e.stol !== stol) return;
+  onSnapshot(collection(db, "rezerwacje"), async snap => {
+  cal.removeAllEvents();
 
-      cal.addEvent({
-  id: d.id,
-  title: e.nazwa,
-  start: e.start.toDate(),
-  end: e.end.toDate(),
-  backgroundColor: color,
-  borderColor: color,
-  textColor: "#fff",
-  extendedProps: {
-    stol: e.stol,
-    createdBy: e.createdBy || ""
+  const now = new Date();
+
+  for (const d of snap.docs) {
+    const e = d.data();
+
+    // bierzemy tylko rezerwacje dla tego stołu
+    if (e.stol !== stol) continue;
+
+    const endDate = e.end.toDate();
+
+    // 👉 DATA ARCHIWIZACJI = koniec + 3 miesiące
+    const archiveDate = new Date(endDate);
+    archiveDate.setMonth(archiveDate.getMonth() + 3);
+
+    // =========================
+    // 📦 ARCHIWUM
+    // =========================
+    if (archiveDate <= now) {
+      // kopiujemy do archiwum
+      await addDoc(collection(db, "rezerwacje_archiwum"), {
+        ...e,
+        archivedAt: Timestamp.fromDate(now)
+      });
+
+      // usuwamy z aktywnych
+      await deleteDoc(doc(db, "rezerwacje", d.id));
+
+      continue; // ⬅️ bardzo ważne
+    }
+
+    // =========================
+    // 📅 AKTYWNE REZERWACJE
+    // =========================
+    cal.addEvent({
+      id: d.id,
+      title: e.nazwa,
+      start: e.start.toDate(),
+      end: e.end.toDate(),
+      backgroundColor: color,
+      borderColor: color,
+      textColor: "#fff",
+      extendedProps: {
+        stol: e.stol,
+        createdBy: e.createdBy || ""
+      }
+    });
   }
 });
-    });
-  });
+
 }
 
 /* 📅 ZMIANA DATY */
