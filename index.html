@@ -237,47 +237,10 @@ if (!allowedDurations.includes(minutes)) {
     },
 
     eventClick: async (info) => {
-  const choice = prompt(
-    "Co chcesz zrobić?\n" +
-    "1 – Usuń rezerwację\n" +
-    "2 – Zmień stół\n" +
-    "(Anuluj – nic nie rób)"
-  );
-
-  // ❌ anulowanie
-  if (!choice) return;
-
-  // 🗑️ USUWANIE
-  if (choice === "1") {
-    await deleteDoc(doc(db, "rezerwacje", info.event.id));
-    return;
-  }
-
-  // 🔄 ZMIANA STOŁU
-  if (choice === "2") {
-    const newTable = prompt(
-      "Na który stół?\n" +
-      "1 – Stół 1\n" +
-      "2 – Stół 2\n" +
-      "3 – Stół 3\n" +
-      "4 – Stół 4"
-    );
-
-    const map = {
-      "1": "Stół 1",
-      "2": "Stół 2",
-      "3": "Stół 3",
-      "4": "Stół 4"
-    };
-
-    if (!map[newTable]) return;
-
-    await updateDoc(doc(db, "rezerwacje", info.event.id), {
-      stol: map[newTable]
-    });
-  }
-}
-
+      if (confirm("Usunąć rezerwację?")) {
+        await deleteDoc(doc(db, "rezerwacje", info.event.id));
+      }
+    }
   });
 
   cal.render();
