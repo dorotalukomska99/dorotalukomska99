@@ -52,7 +52,7 @@ const colors = {
   c4: "#f44336"
 };
 
-let calendars = [];
+
 let currentDate = new Date();
 
 const usersMap = {
@@ -86,230 +86,7 @@ function updateDateLabel(date) {
     formatter.format(date);
 }
 
-/* 🧠 KALENDARZ */
-function createCalendar(id, stol, color) {
-  const cal = new FullCalendar.Calendar(document.getElementById(id), {
-timeZone: 'local',
-    initialView: "timeGridDay",
-    locale: "pl",
-    allDaySlot: false,
-    selectable: true,
-    editable: true,
-eventResizableFromStart: true,
-eventStartEditable: true,
-    nowIndicator: true,
-    slotMinTime: "16:00:00",
-    slotMaxTime: "26:00:00",
-slotDuration: "00:15:00",
-snapDuration: "00:15:00",
-    height: "auto",
-    initialDate: currentDate,
-    headerToolbar: false,
 
-    select: async (info) => {
-
-  const minutes = Math.round((info.end - info.start) / (1000 * 60));
-
-  const allowedDurations = [
-    30, 60, 90, 120, 150,
-    180, 210, 240, 270, 300
-  ];
-
-  if (!allowedDurations.includes(minutes)) {
-    alert(
-      "Dozwolone czasy:\n" +
-      "30, 60, 90, 120, 150, 180, 210, 240, 270 lub 300 minut"
-    );
-    return;
-  }
-
- 
-      const name = prompt("Kto rezerwuje?");
-      if (!name) return;
-
-      const events = cal.getEvents();
-      if (isOverlapping(events, info.start, info.end)) {
-        alert("Ten stół jest już zajęty");
-        return;
-      }
-
-      await addDoc(collection(db, "rezerwacje"), {
-  nazwa: name,
-  start: Timestamp.fromDate(info.start),
-  end: Timestamp.fromDate(info.end),
-  stol,
-  createdBy: currentUserName
-});
-
-    },
-dateClick: async (info) => {
-  const start = new Date(info.date);
-start.setMinutes(Math.round(start.getMinutes() / 15) * 15);
-start.setSeconds(0);
-start.setMilliseconds(0);
-
- const duration = prompt(
-  "Na ile czasu?\nWpisz liczbę minut:\n30–300 co 30 minut",
-  "120"
-);
-
-  if (!duration) return;
-
- const minutes = parseInt(duration, 10);
-
-const allowedDurations = [
-  30, 60, 90, 120, 150,
-  180, 210, 240, 270, 300
-];
-
-if (!allowedDurations.includes(minutes)) {
-  alert(
-    "Dozwolone czasy:\n" +
-    "30, 60, 90, 120, 150, 180, 210, 240, 270 lub 300 minut"
-  );
-  return;
-}
-
-  const end = new Date(start.getTime() + minutes * 60 * 1000);
-
-  const name = prompt("Kto rezerwuje?");
-  if (!name) return;
-
-  const events = cal.getEvents();
-  if (isOverlapping(events, start, end)) {
-    alert("Ten stół jest już zajęty");
-    return;
-  }
-
-  await addDoc(collection(db, "rezerwacje"), {
-  nazwa: name,
-  start: Timestamp.fromDate(start),
-  end: Timestamp.fromDate(end),
-  stol,
-  createdBy: currentUserName
-});
-},
-
-    eventDidMount: (info) => {
-  const now = new Date();
-  if (info.event.start < now) {
-    info.el.style.opacity = "0.4";
-  }
-
-  const who = info.event.extendedProps.createdBy;
-  if (who) {
-    const badge = document.createElement("div");
-    badge.textContent = who;
-    badge.style.position = "absolute";
-    badge.style.bottom = "2px";
-    badge.style.right = "4px";
-    badge.style.fontSize = "10px";
-    badge.style.opacity = "0.8";
-
-    info.el.appendChild(badge);
-}  
-    },
-
-    eventDrop: async (info) => {
-  const events = cal.getEvents();
-
-  // sprawdzanie nakładania na NOWYM stole
-  if (isOverlapping(events, info.event.start, info.event.end, info.event.id)) {
-    alert("Ten stół jest już zajęty");
-    info.revert();
-    return;
-  }
-
-  await updateDoc(doc(db, "rezerwacje", info.event.id), {
-    start: Timestamp.fromDate(info.event.start),
-    end: Timestamp.fromDate(info.event.end),
-    stol: stol
-  });
-},
-
-    eventResize: async (info) => {
-      const events = cal.getEvents();
-      if (isOverlapping(events, info.event.start, info.event.end, info.event.id)) {
-        alert("Ten stół jest już zajęty");
-        info.revert();
-        return;
-      }
-
-      await updateDoc(doc(db, "rezerwacje", info.event.id), {
-        start: Timestamp.fromDate(info.event.start),
-        end: Timestamp.fromDate(info.event.end)
-      });
-    },
-
-    eventClick: async (info) => {
-      if (confirm("Usunąć rezerwację?")) {
-        await deleteDoc(doc(db, "rezerwacje", info.event.id));
-      }
-    }
-  });
-
-  cal.render();
-// 🔒 BLOKADA PRZESUWANIA NA URZĄDZENIACH DOTYKOWYCH
-if ('ontouchstart' in window) {
-  cal.setOption('editable', false);
-  cal.setOption('eventStartEditable', false);
-  cal.setOption('eventDurationEditable', false);
-}
-  calendars.push(cal);
-
-  onSnapshot(collection(db, "rezerwacje"), async snap => {
-  cal.removeAllEvents();
-
-  const now = new Date();
-
-  for (const d of snap.docs) {
-    const e = d.data();
-
-    // bierzemy tylko rezerwacje dla tego stołu
-    if (e.stol !== stol) continue;
-
-    const endDate = e.end.toDate();
-
-    // 👉 DATA ARCHIWIZACJI = koniec + 3 miesiące
-    const archiveDate = new Date(endDate);
-    archiveDate.setMonth(archiveDate.getMonth() + 3);
-
-    // =========================
-    // 📦 ARCHIWUM
-    // =========================
-    if (archiveDate <= now) {
-      // kopiujemy do archiwum
-      await addDoc(collection(db, "rezerwacje_archiwum"), {
-        ...e,
-        archivedAt: Timestamp.fromDate(now)
-      });
-
-      // usuwamy z aktywnych
-      await deleteDoc(doc(db, "rezerwacje", d.id));
-
-      continue; // ⬅️ bardzo ważne
-    }
-
-    // =========================
-    // 📅 AKTYWNE REZERWACJE
-    // =========================
-    cal.addEvent({
-      id: d.id,
-      title: e.nazwa,
-      start: e.start.toDate(),
-      end: e.end.toDate(),
-      backgroundColor: color,
-      borderColor: color,
-      textColor: "#fff",
-      extendedProps: {
-        stol: e.stol,
-        createdBy: e.createdBy || ""
-      }
-    });
-  }
-});
-
-}
 
 /* 📅 ZMIANA DATY */
 function changeDate(date) {
@@ -322,10 +99,80 @@ function changeDate(date) {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  createCalendar("c1", "Stół 1", colors.c1);
-  createCalendar("c2", "Stół 2", colors.c2);
-  createCalendar("c3", "Stół 3", colors.c3);
-  createCalendar("c4", "Stół 4", colors.c4);
+const calendar = new FullCalendar.Calendar(
+  document.getElementById("calendar"),
+  {
+    timeZone: "local",
+    initialView: "resourceTimeGridDay",
+    locale: "pl",
+    selectable: true,
+    editable: true,
+    eventResizableFromStart: true,
+    nowIndicator: true,
+    slotMinTime: "16:00:00",
+    slotMaxTime: "26:00:00",
+    slotDuration: "00:15:00",
+    snapDuration: "00:15:00",
+    height: "auto",
+    initialDate: currentDate,
+    headerToolbar: false,
+
+    resources: [
+      { id: "1", title: "Stół 1" },
+      { id: "2", title: "Stół 2" },
+      { id: "3", title: "Stół 3" },
+      { id: "4", title: "Stół 4" }
+    ],
+
+    select: async (info) => {
+      const minutes = Math.round((info.end - info.start) / (1000 * 60));
+
+      const allowedDurations = [
+        30, 60, 90, 120, 150,
+        180, 210, 240, 270, 300
+      ];
+
+      if (!allowedDurations.includes(minutes)) {
+        alert("Dozwolone czasy:\n30–300 co 30 minut");
+        return;
+      }
+
+      const name = prompt("Kto rezerwuje?");
+      if (!name) return;
+
+      await addDoc(collection(db, "rezerwacje"), {
+        nazwa: name,
+        start: Timestamp.fromDate(info.start),
+        end: Timestamp.fromDate(info.end),
+        resourceId: info.resource.id,
+        createdBy: currentUserName
+      });
+    },
+
+    eventDrop: async (info) => {
+      await updateDoc(doc(db, "rezerwacje", info.event.id), {
+        start: Timestamp.fromDate(info.event.start),
+        end: Timestamp.fromDate(info.event.end),
+        resourceId: info.event.getResources()[0].id
+      });
+    },
+
+    eventResize: async (info) => {
+      await updateDoc(doc(db, "rezerwacje", info.event.id), {
+        start: Timestamp.fromDate(info.event.start),
+        end: Timestamp.fromDate(info.event.end)
+      });
+    },
+
+    eventClick: async (info) => {
+      if (confirm("Usunąć rezerwację?")) {
+        await deleteDoc(doc(db, "rezerwacje", info.event.id));
+      }
+    }
+  }
+);
+
+calendar.render();
 
   updateDateLabel(currentDate);
 
@@ -481,12 +328,10 @@ input[type="date"], button {
   <input type="date" id="datePicker">
   <button id="next">▶</button>
 </header>
-<div class="tables">
-  <div class="table"><h2>Stół 1</h2><div id="c1"></div></div>
-  <div class="table"><h2>Stół 2</h2><div id="c2"></div></div>
-  <div class="table"><h2>Stół 3</h2><div id="c3"></div></div>
-  <div class="table"><h2>Stół 4</h2><div id="c4"></div></div>
+<div style="padding:10px;">
+  <div id="calendar"></div>
 </div>
+
 
 <div id="summary" style="
   padding: 15px;
