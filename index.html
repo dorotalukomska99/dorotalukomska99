@@ -211,18 +211,21 @@ if (!allowedDurations.includes(minutes)) {
     },
 
     eventDrop: async (info) => {
-      const events = cal.getEvents();
-      if (isOverlapping(events, info.event.start, info.event.end, info.event.id)) {
-        alert("Ten stół jest już zajęty");
-        info.revert();
-        return;
-      }
+  const events = cal.getEvents();
 
-      await updateDoc(doc(db, "rezerwacje", info.event.id), {
-        start: Timestamp.fromDate(info.event.start),
-        end: Timestamp.fromDate(info.event.end)
-      });
-    },
+  // sprawdzanie nakładania na NOWYM stole
+  if (isOverlapping(events, info.event.start, info.event.end, info.event.id)) {
+    alert("Ten stół jest już zajęty");
+    info.revert();
+    return;
+  }
+
+  await updateDoc(doc(db, "rezerwacje", info.event.id), {
+    start: Timestamp.fromDate(info.event.start),
+    end: Timestamp.fromDate(info.event.end),
+    stol: stol
+  });
+},
 
     eventResize: async (info) => {
       const events = cal.getEvents();
