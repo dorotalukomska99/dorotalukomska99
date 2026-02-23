@@ -425,9 +425,14 @@ input[type="date"], button {
   padding: 6px 10px;
   border-radius: 6px;
 }
-/* LINIE CO 15/30/45 MIN */
+/* LINIE CO 15 MIN */
 .fc-timegrid-slot {
   border-top: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+/* LINIE CO 30 MIN */
+.fc-timegrid-slot[data-time$=":30:00"] {
+  border-top: 4px solid rgba(255, 255, 255, 0.65);
 }
 
 /* LINIE PEŁNYCH GODZIN */
