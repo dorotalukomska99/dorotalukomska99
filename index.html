@@ -61,6 +61,7 @@ const usersMap = {
 };
 
 let currentUserName = "";
+const isMobile = window.innerWidth <= 768;
 
 
 /* 🔁 SPRAWDZANIE NAKŁADANIA */
@@ -93,8 +94,8 @@ timeZone: 'local',
     locale: "pl",
     allDaySlot: false,
     selectable: true,
-    editable: true,
-    eventResizableFromStart: true,
+    editable: !isMobile,
+eventResizableFromStart: !isMobile,
     nowIndicator: true,
     slotMinTime: "16:00:00",
     slotMaxTime: "26:00:00",
