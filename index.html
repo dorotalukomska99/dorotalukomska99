@@ -54,7 +54,7 @@ const colors = {
 
 
 let currentDate = new Date();
-
+let calendar;
 const usersMap = {
   "dorotalukomska99@gmail.com": "Dorota",
   "merkurytilt@gmail.com": "Paweł"
@@ -91,15 +91,15 @@ function updateDateLabel(date) {
 /* 📅 ZMIANA DATY */
 function changeDate(date) {
   const d = new Date(date);
-  d.setHours(0, 0, 0, 0);   // ← TO JEST KLUCZOWE
+  d.setHours(0, 0, 0, 0);
 
   currentDate = d;
-  calendars.forEach(c => c.gotoDate(d));
+  calendar.gotoDate(d);
   updateDateLabel(d);
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-const calendar = new FullCalendar.Calendar(
+calendar = new FullCalendar.Calendar(
   document.getElementById("calendar"),
   {
     timeZone: "local",
