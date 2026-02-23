@@ -220,7 +220,7 @@ if (!allowedDurations.includes(minutes)) {
   }
 
   // 🔥 sprawdzamy czy zmienił się stół
-  const oldTable = info.oldEvent.extendedProps.stol;
+  
   const newTable = stol;
 
   await updateDoc(doc(db, "rezerwacje", info.event.id), {
