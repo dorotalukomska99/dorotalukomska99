@@ -418,21 +418,14 @@ input[type="date"], button {
   padding: 6px 10px;
   border-radius: 6px;
 }
-.fc-timegrid-slot[data-time$=":00:00"] {
-  border-top: 2px solid rgba(255,255,255,0.35);
-}
-/* WYRAŹNE LINIE CO PEŁNĄ GODZINĘ */
-.fc-timegrid-slot[data-time$=":00:00"] {
-  border-top: 3px solid rgba(255, 255, 255, 0.55) !important;
+/* LINIE CO 15/30/45 MIN */
+.fc-timegrid-slot {
+  border-top: 2px solid rgba(255, 255, 255, 0.25);
 }
 
-/* CIEŃSZE LINIE POŁÓWEK */
-.fc-timegrid-slot {
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-}
+/* LINIE PEŁNYCH GODZIN */
 .fc-timegrid-slot[data-time$=":00:00"] {
-  border-top: 3px solid rgba(255,255,255,0.6) !important;
-  box-shadow: 0 -1px 0 rgba(0,0,0,0.8);
+  border-top: 3px solid rgba(255, 255, 255, 0.6) !important;
 }
 </style>
 </head>
